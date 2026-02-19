@@ -1,0 +1,193 @@
+{% extends 'base_public.html' %}
+{% block title %}Deactivated Products | LedgerX{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 animate__animated animate__fadeIn">
+        <div>
+            <h2 class="fw-bold mb-0 text-danger">Archived Products</h2>
+            <p class="text-muted small mb-0">Restore products to resume tracking and sales.</p>
+        </div>
+        <a href="{% url 'product_list' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold">
+            ← Back to Active List
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-2 animate__animated animate__fadeInUp">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-0 ps-3">🔍</span>
+            <input 
+                type="text" 
+                id="searchInput"
+                class="form-control border-0 shadow-none" 
+                placeholder="Search archives instantly..." 
+            >
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden animate__animated animate__fadeInUp" style="min-height: 400px;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
+                <thead class="bg-light text-muted small">
+                    <tr>
+                        <th class="ps-4 py-3 border-0">PRODUCT</th>
+                        <th class="py-3 border-0">PRICE</th>
+                        <th class="py-3 border-0">STATUS</th>
+                        <th class="text-end pe-4 py-3 border-0">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for product in products %}
+                    <tr class="product-row opacity-75">
+                        <td class="ps-4 py-3 border-0">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    {% if product.image %}
+                                        <img src="{{ product.image.url }}" alt="img" class="rounded-3 border grayscale" style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light rounded-3 border d-flex align-items-center justify-content-center text-muted" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-box-seam"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-muted search-name">{{ product.name }}</div>
+                                    <div class="x-small text-muted search-category">{{ product.category|default:"General" }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="border-0 text-muted">₹{{ product.default_price }}</td>
+
+                        <td class="border-0">
+                            <span class="badge bg-danger-subtle text-danger border border-danger px-3 rounded-pill">Inactive</span>
+                        </td>
+
+                        <td class="text-end pe-4 border-0">
+                            <button 
+                                class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm"
+                                onclick="openRestoreModal('{{ product.id }}', '{{ product.name|escapejs }}')">
+                                ♻️ Restore
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr id="emptyDbRow">
+                        <td colspan="4" class="text-center py-5 border-0">
+                            <div class="mb-3 display-1 opacity-25">🗑️</div>
+                            <h5 class="fw-bold text-muted">No deactivated products</h5>
+                            <p class="text-muted small">Your archive is currently empty.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    
+                    <tr id="noDataRow" style="display: none;">
+                        <td colspan="4" class="text-center py-5 border-0 text-muted">No matches found</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer bg-white border-0 py-3 d-flex justify-content-center" id="paginationControls">
+            <button class="btn btn-sm btn-light rounded-circle mx-1" id="prevBtn">←</button>
+            <span class="mx-3 small fw-bold text-muted align-self-center" id="pageIndicator">Page 1</span>
+            <button class="btn btn-sm btn-light rounded-circle mx-1" id="nextBtn">→</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="restoreModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Restore Product?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4 px-4">
+        <div class="fs-1 mb-3">📦</div>
+        <p class="text-muted mb-0">Are you sure you want to reactivate <strong id="modalProductName" class="text-dark"></strong>?</p>
+        <p class="small text-muted mt-1">This will move it back to your active inventory.</p>
+      </div>
+      <div class="modal-footer border-0 pb-4 px-4 d-flex flex-column-reverse flex-sm-row justify-content-center gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold w-100 w-sm-auto" data-bs-dismiss="modal">Cancel</button>
+        <a href="#" id="modalConfirmBtn" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm w-100 w-sm-auto">Yes, Restore</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+    .grayscale { filter: grayscale(100%); opacity: 0.6; }
+    html { overflow-y: scroll; }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById("searchInput");
+    const rows = Array.from(document.querySelectorAll(".product-row"));
+    const noDataRow = document.getElementById("noDataRow");
+    
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    let filteredRows = rows;
+
+    function renderTable() {
+        rows.forEach(row => row.style.display = "none");
+
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageRows = filteredRows.slice(start, end);
+
+        pageRows.forEach(row => {
+            row.style.display = "table-row";
+            row.classList.add("animate__animated", "animate__fadeIn");
+        });
+
+        if (filteredRows.length === 0 && rows.length > 0) {
+            noDataRow.style.display = "table-row";
+        } else {
+            noDataRow.style.display = "none";
+        }
+
+        document.getElementById("pageIndicator").innerText = `Page ${currentPage} of ${totalPages}`;
+        document.getElementById("prevBtn").disabled = currentPage === 1;
+        document.getElementById("nextBtn").disabled = currentPage === totalPages;
+        
+        const controls = document.getElementById("paginationControls");
+        controls.style.opacity = totalPages <= 1 ? "0.5" : "1";
+        controls.style.pointerEvents = totalPages <= 1 ? "none" : "auto";
+    }
+
+    searchInput.addEventListener("input", function() {
+        const query = this.value.toLowerCase().trim();
+        filteredRows = rows.filter(row => {
+            const name = row.querySelector(".search-name").innerText.toLowerCase();
+            const category = row.querySelector(".search-category").innerText.toLowerCase();
+            return name.includes(query) || category.includes(query);
+        });
+        currentPage = 1;
+        renderTable();
+    });
+
+    document.getElementById("prevBtn").onclick = () => { if (currentPage > 1) { currentPage--; renderTable(); } };
+    document.getElementById("nextBtn").onclick = () => {
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (currentPage < totalPages) { currentPage++; renderTable(); }
+    };
+
+    renderTable();
+});
+
+function openRestoreModal(id, name) {
+    document.getElementById('modalProductName').innerText = name;
+    // Updated to match your URL name 'product_reactivate'
+    document.getElementById('modalConfirmBtn').href = `/products/reactivate/${id}/`;
+    var myModal = new bootstrap.Modal(document.getElementById('restoreModal'));
+    myModal.show();
+}
+</script>
+{% endblock %}

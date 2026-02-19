@@ -73,7 +73,8 @@ class TransactionItem(models.Model):
     # Protect product if used in history
     product = models.ForeignKey(
         Product,
-        on_delete=models.PROTECT
+        on_delete=models.CASCADE,
+        related_name='transaction_items'
     )
 
     quantity = models.PositiveIntegerField()
