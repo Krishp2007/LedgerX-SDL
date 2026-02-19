@@ -196,6 +196,32 @@ def export_inventory_csv(request):
     return response
 
 
+# products/views.py
+@login_required
+def product_deactivated_list(request):
+    """
+    Shows products that have been soft-deleted (is_active=False).
+    """
+    shop = request.user.shop
+    products = Product.objects.filter(
+        shop=shop,
+        is_active=False
+    ).order_by('-created_at')
+
+    return render(request, 'products/product_deactivated_list.html', {'products': products})
+
+@login_required
+def product_reactivate(request, product_id):
+    """
+    Restores a deactivated product to the active list.
+    """
+    shop = request.user.shop
+    product = get_object_or_404(Product, id=product_id, shop=shop)
+    product.is_active = True
+    product.save()
+    messages.success(request, f"{product.name} has been reactivated.")
+    return redirect('product_deactivated_list')
+
 @login_required
 def product_restock(request):
     """

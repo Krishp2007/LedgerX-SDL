@@ -10,6 +10,8 @@ urlpatterns = [
     path('<int:product_id>/deactivate/', views.product_deactivate, name='product_deactivate'),
     path('low-stock/', views.product_low_stock, name='product_low_stock'), # 🟢 New URL for low stock products
 
+    path('deactivated/', views.product_deactivated_list, name='product_deactivated_list'),
+    path('reactivate/<int:product_id>/', views.product_reactivate, name='product_reactivate'),
     path('export/', views.export_inventory_csv, name='export_inventory_csv'),
 
     path('restock/', views.product_restock, name='product_restock'),
