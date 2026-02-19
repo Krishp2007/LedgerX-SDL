@@ -195,3 +195,67 @@ def export_inventory_csv(request):
 
     return response
 
+
+@login_required
+def product_restock(request):
+    """
+    Displays inventory with input fields for 'Restock Quantity'.
+    """
+    shop = request.user.shop
+    products = Product.objects.filter(shop=shop, is_active=True).order_by('name')
+    return render(request, 'products/product_restock.html', {'products': products})
+
+
+@login_required
+def export_restock_csv(request):
+    """
+    Generates a CSV with Shop Details in Row 1, followed by the Restock Plan.
+    """
+    if request.method == "POST":
+        shop = request.user.shop
+        products = Product.objects.filter(shop=shop, is_active=True).order_by('name')
+
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="restock_plan.csv"'
+        response.write(u'\ufeff'.encode('utf8')) # Fix for Excel symbols
+
+        writer = csv.writer(response)
+
+        # 🟢 ROW 1: Shop Metadata (Owner, Shop Name, Email)
+        # We fetch email from the User model attached to the shop
+        writer.writerow([
+            shop.owner_name,      # Value 1
+            shop.shop_name,       # Value 2
+            request.user.email    # Value 3
+        ])
+
+        # 🟢 ROW 2: Column Headers (The 5 Columns)
+        writer.writerow(['Product Name', 'Category', 'Price', 'Current Stock', 'Restock Quantity'])
+
+        has_data = False
+        for product in products:
+            qty_str = request.POST.get(f'restock_{product.id}', '0')
+            
+            try:
+                qty = int(qty_str)
+            except ValueError:
+                qty = 0
+            
+            if qty > 0:
+                writer.writerow([
+                    product.name,
+                    product.category or 'General',
+                    product.default_price,
+                    product.stock_quantity,
+                    qty
+                ])
+                has_data = True
+        
+        if not has_data:
+            messages.warning(request, "No products selected for restock.")
+            return redirect('product_restock')
+
+        return response
+    
+    return redirect('product_restock')
+

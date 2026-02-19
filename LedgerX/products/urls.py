@@ -12,4 +12,7 @@ urlpatterns = [
 
     path('export/', views.export_inventory_csv, name='export_inventory_csv'),
 
+    path('restock/', views.product_restock, name='product_restock'),
+    path('restock/export/', views.export_restock_csv, name='export_restock_csv'),
+
 ]
