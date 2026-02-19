@@ -23,7 +23,7 @@ class Product(models.Model):
 
     # Inventory
     stock_quantity = models.PositiveIntegerField()
-    low_stock_threshold = models.PositiveIntegerField(default=5)
+    low_stock_threshold = models.PositiveIntegerField(default=10)
 
     # Soft delete
     is_active = models.BooleanField(default=True)

@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import F
 
 from .models import Product
 import csv
@@ -37,6 +38,20 @@ def product_out_of_stock(request):
 
     return render(request, 'products/product_out_of_stock.html', {'products': products})
 
+
+@login_required
+def product_low_stock(request):
+    """
+    Shows active products with STOCK < Threshold.
+    """
+    shop = request.user.shop
+    products = Product.objects.filter(
+        shop=shop,
+        is_active=True,
+        stock_quantity__lt=F('low_stock_threshold')
+    ).order_by('stock_quantity')
+
+    return render(request, 'products/product_low_stock.html', {'products': products})
 
 @login_required
 def product_add(request):
