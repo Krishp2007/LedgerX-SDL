@@ -48,7 +48,7 @@ def dashboard(request):
     # Low Stock: Count products with less than 10 quantity
     low_stock_count = Product.objects.filter(
         shop=shop, 
-        stock_quantity__lt=10
+        stock_quantity__lt=F('low_stock_threshold') # Use dynamic threshold
     ).count()
     
     # Total Active Customers

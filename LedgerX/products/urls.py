@@ -8,7 +8,7 @@ urlpatterns = [
     path('<int:product_id>/', views.product_detail, name='product_detail'),
     path('<int:product_id>/edit/', views.product_edit, name='product_edit'),
     path('<int:product_id>/deactivate/', views.product_deactivate, name='product_deactivate'),
-
+    path('low-stock/', views.product_low_stock, name='product_low_stock'), # 🟢 New URL for low stock products
 
     path('export/', views.export_inventory_csv, name='export_inventory_csv'),
 
