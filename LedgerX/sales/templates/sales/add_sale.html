@@ -516,7 +516,7 @@
                 bootstrap.Modal.getInstance(document.getElementById('addCustomerModal')).hide();
                 this.reset();
                 errorEl.classList.add('d-none');
-            } else { errorEl.innerText = data.message; errorEl.classList.remove('d-none'); }
+            } else { errorEl.innerText = 'Mobile number already exists.'; errorEl.classList.remove('d-none'); }
         });
     });
 

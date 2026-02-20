@@ -3,8 +3,7 @@ from django.shortcuts import render
 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum,Q, Count, Avg, F, ExpressionWrapper, fields
-from django.db import models
+from django.db.models import Sum,Q, F
 from django.utils import timezone
 from datetime import timedelta
 import json
@@ -189,7 +188,6 @@ def reports_home(request):
     Shows links to different reports.
     """
     return render(request, 'reports/reports_home.html')
-
 
 
 @login_required

@@ -1,7 +1,5 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
-from django.db.models import Sum
 
 from .models import QRToken
 from sales.models import Transaction
@@ -183,3 +181,4 @@ def payment_bridge_view(request):
          context['customer'] = customer
 
     return render(request, 'qr/payment_bridge.html', context)
+
