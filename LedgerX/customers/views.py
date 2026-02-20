@@ -193,14 +193,4 @@ def customer_reactivate(request, customer_id):
 
     messages.success(request, f'Customer "{customer.name}" restored successfully.')
     return redirect('customer_list')
-    """
-    Restores a deactivated customer.
-    """
-    shop = request.user.shop
-    customer = get_object_or_404(Customer, id=customer_id, shop=shop)
-
-    customer.is_active = True
-    customer.save()
-
-    messages.success(request, f'Customer "{customer.name}" reactivated successfully.')
-    return redirect('customer_list')
+    
