@@ -10,9 +10,6 @@ __pycache__/
 media/
 staticfiles/
 
-seed_data.py
-LedgerX-Final.pptx
-
 data.json
 
 # Distribution / packaging
