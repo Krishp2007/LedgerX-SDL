@@ -196,3 +196,6 @@ STORAGES = {
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 # ⚠️ IMPORTANT: This email MUST be verified in your Brevo account (Senders & IPs)
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
+
+GOOGLE_ANALYTICS_TRACKING_ID = os.getenv("GOOGLE_ANAYLYTICS_TRACKING_ID")
